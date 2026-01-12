@@ -7,6 +7,7 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 class Config(object):
     FLASK_APP = os.environ.get('FLASK_APP')
     FLASK_DEBUG = False
+    CACHE_TYPE = 'SimpleCache'
     SECRET_KEY = os.environ.get('SECRET_KEY')
     SQLALCHEMY_TRACK_MODIFICATIONS = True
 
