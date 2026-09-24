@@ -4,8 +4,9 @@ import requests
 import botocore.exceptions
 from flask_expects_json import expects_json
 from flask import g, request, current_app, jsonify
+from sqlalchemy.exc import SQLAlchemyError
 
-from core import s3
+from core import db, s3
 from core.upload_app import bp
 from core.models import UserFileStore
 from core.decorators import login_required
@@ -13,6 +14,11 @@ from core.utils import generate_s3_presigned_upload_url, \
     upload_checks_and_additions
 from core.json_schemas import retrieve_file_schema, post_upload_schema, \
     generate_file_upload_schema
+
+
+@bp.route("/health")
+def health():
+    return {"status": "ok"}, 200
 
 
 @bp.route('/file/generate_file_upload_url', methods=['POST'])
@@ -108,7 +114,7 @@ def retrieve_file_link():
 def delete_file(file_store_id):
     """ Deletes the file """
     file_check = UserFileStore.query.filter_by(
-        id=file_store_id
+        id=file_store_id, user_id=g.user_id
     ).first()
     if not file_check:
         return jsonify({
@@ -117,10 +123,24 @@ def delete_file(file_store_id):
                 "message": "file not found."
             }
         }), 404
-    s3.delete_object(
-        Bucket=os.environ.get("S3_BUCKET_NAME"),
-        Key=file_check.file_key
-    )
+    db.session.delete(file_check)
+    try:
+        db.session.commit()
+    except SQLAlchemyError:
+        db.session.rollback()
+        current_app.logger.exception("Could not delete file metadata")
+        return jsonify({"error": "could not delete file."}), 500
+    try:
+        s3.delete_object(
+            Bucket=os.environ.get("S3_BUCKET_NAME"),
+            Key=file_check.file_key
+        )
+    except (botocore.exceptions.BotoCoreError,
+            botocore.exceptions.ClientError):
+        current_app.logger.exception("Could not delete file from storage")
+        return jsonify({
+            "error": "file was deleted, but storage cleanup failed."
+        }), 502
     return jsonify({
         "success": True
     }), 200

@@ -80,6 +80,17 @@ def generate_error_response(error_bool, error_message, status_code=None):
     }
 
 
+def delete_s3_object(s3_bucket, file_key):
+    """Delete an object and return whether cleanup succeeded."""
+    try:
+        s3.delete_object(Bucket=s3_bucket, Key=file_key)
+        return True
+    except (botocore.exceptions.BotoCoreError,
+            botocore.exceptions.ClientError):
+        current_app.logger.exception("Could not delete rejected upload")
+        return False
+
+
 def generate_s3_presigned_upload_url(json_data):
     """Generates presigned url for chat file upload to s3"""
     user_id = g.user_id
@@ -148,25 +159,49 @@ def upload_checks_and_additions(json_data):
     # Fetching the metadata from S3
     try:
         head = s3.head_object(Bucket=s3_bucket, Key=file_key)
-    except s3.exceptions.NoSuchKey:
-        return generate_error_response(True, "file not found.")
+    except botocore.exceptions.ClientError as error:
+        status_code = error.response.get('ResponseMetadata', {}).get(
+            'HTTPStatusCode'
+        )
+        if status_code == 404:
+            return generate_error_response(True, "file not found.", 404)
+        current_app.logger.exception("Could not inspect uploaded file")
+        return generate_error_response(
+            True, "could not validate uploaded file.", 500
+        )
+    except botocore.exceptions.BotoCoreError:
+        current_app.logger.exception("Could not inspect uploaded file")
+        return generate_error_response(
+            True, "could not validate uploaded file.", 500
+        )
 
     # Enforcing size
     if head["ContentLength"] > int(os.environ.get('MAX_FILE_SIZE')):
-        s3.delete_object(
-            Bucket=s3_bucket, Key=file_key
-        )
+        if not delete_s3_object(s3_bucket, file_key):
+            return generate_error_response(
+                True, "could not remove oversized file.", 500
+            )
         return generate_error_response(True, "File too large.")
 
     # Magic Bytes checking
-    obj = s3.get_object(
-        Bucket=s3_bucket, Key=file_key, Range="bytes=0-8191"
-    )
+    try:
+        obj = s3.get_object(
+            Bucket=s3_bucket, Key=file_key, Range="bytes=0-8191"
+        )
+    except (botocore.exceptions.BotoCoreError,
+            botocore.exceptions.ClientError):
+        current_app.logger.exception("Could not read uploaded file")
+        return generate_error_response(
+            True, "could not validate uploaded file.", 500
+        )
     header_data = obj["Body"].read()
     real_mime = magic.Magic(mime=True).from_buffer(header_data)
 
     if real_mime not in os.environ.get('ALLOWED_FILE_TYPES'):
-        s3.delete_object(Bucket=s3_bucket, Key=file_key)
+        if not delete_s3_object(s3_bucket, file_key):
+            return generate_error_response(
+                True, "could not remove invalid file.", 500
+            )
         return generate_error_response(True, "invalid content type.")
 
     # Adding the file key to database

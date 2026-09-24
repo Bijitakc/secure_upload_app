@@ -12,7 +12,10 @@ def login_required(func):
         authorization = request.headers.get("authorization", None)
         if not authorization:
             abort(401)
-        token = authorization.split(' ')[1]
+        try:
+            token = authorization.split(' ')[1]
+        except IndexError:
+            abort(401)
         token_decode_resp = token_decode(token)
         if token_decode_resp['error'] is True:
             return ({
