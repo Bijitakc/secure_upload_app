@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: upload-ingress
+spec:
+  tls:
+    - hosts:
+        - upload.local
+      secretName: upload-tls
+  rules:
+    - host: upload.local
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: upload-web
+                port:
+                  number: 80
