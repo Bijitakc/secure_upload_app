@@ -48,7 +48,9 @@ def create_app(config_name, **kwargs) -> Flask:
 
     # Registering Blueprints
     from core.upload_app import bp as u_bp
+    from core.metrics_app import bp as m_bp
 
     app.register_blueprint(u_bp)
+    app.register_blueprint(m_bp)
 
     return app
