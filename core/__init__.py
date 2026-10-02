@@ -7,12 +7,14 @@ from flask_caching import Cache
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
+from prometheus_flask_exporter import PrometheusMetrics
 
 
 # flask extensions
 cache = Cache()
 db = SQLAlchemy()
 marshmallow = Marshmallow()
+metrics = PrometheusMetrics()
 migrate = Migrate(compare_type=True)
 s3 = boto3.client("s3", region_name=os.environ.get("S3_REGION"))
 
@@ -42,15 +44,14 @@ def create_app(config_name, **kwargs) -> Flask:
     cache.init_app(app)
     db.init_app(app)
     marshmallow.init_app(app)
+    metrics.init_app(app)
     migrate.init_app(app, db)
     with app.app_context():
         cache.clear()
 
     # Registering Blueprints
     from core.upload_app import bp as u_bp
-    from core.metrics_app import bp as m_bp
 
     app.register_blueprint(u_bp)
-    app.register_blueprint(m_bp)
 
     return app
