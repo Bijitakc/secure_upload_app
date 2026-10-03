@@ -64,3 +64,39 @@ Images are tagged with:
 
 - `latest`
 - `<git-commit-sha>`
+
+## Monitoring
+The application is instrumented with Prometheus metrics and monitored using Prometheus and Grafana.
+
+### Monitoring Stack
+- **Prometheus** — collects and stores application and Kubernetes metrics
+- **Prometheus Operator / ServiceMonitor** — discovers the Flask application and configures metric scraping
+- **prometheus-flask-exporter** — exposes Flask HTTP request metrics at `/metrics`
+- **Grafana** — visualizes application metrics through a dashboard
+
+### Monitoring Flow
+
+```text
+Flask Application
+       │
+       │ /metrics
+       ▼
+ServiceMonitor
+       │
+       ▼
+Prometheus
+       │
+       │ PromQL
+       ▼
+Grafana Dashboard
+```
+
+### Grafana Dashboard
+
+![Grafana Dashboard](docs/grafana-dashboard.png)
+
+The dashboard currently tracks:
+
+- Request rate
+- 5xx error rate
+- P95 request latency
