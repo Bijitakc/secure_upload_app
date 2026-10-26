@@ -2,6 +2,8 @@
 
 A secure file upload service built with Flask and AWS S3. Files **never touch the backend**, and access is controlled using **pre-signed URLs** with automatic expiration. Ideal for handling sensitive data in regulated industries (healthcare, fintech, legal, HR).
 
+**Medium article:** https://medium.com/@bijitakc/how-i-built-a-secure-file-upload-service-with-flask-docker-and-aws-s3-56dc7420ae76
+
 ## Features
 
 - Flask REST API
