@@ -13,6 +13,8 @@ services:
     environment:
       - WSGI_HOST=0.0.0.0
       - PORT=5000
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     depends_on:
       - upload_db
     volumes:

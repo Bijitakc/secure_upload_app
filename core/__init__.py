@@ -15,7 +15,11 @@ cache = Cache()
 db = SQLAlchemy()
 marshmallow = Marshmallow()
 migrate = Migrate(compare_type=True)
-s3 = boto3.client("s3", region_name=os.environ.get("S3_REGION"))
+s3 = boto3.client(
+    "s3",
+    region_name=os.environ.get("S3_REGION"),
+    endpoint_url=os.environ.get("S3_ENDPOINT_URL") or None,
+)
 
 
 def create_app(config_name, **kwargs) -> Flask:

@@ -106,7 +106,8 @@ def generate_s3_presigned_upload_url(json_data):
             True, "filename cannot be empty.", 400
         )
     # generating secure filename
-    file_key = f"attachments/files/{user_id}/{uuid.uuid4()}.{file_ext}"
+    key_prefix = os.environ["S3_KEY_PREFIX"].strip("/")
+    file_key = f"{key_prefix}/{user_id}/{uuid.uuid4()}.{file_ext}"
 
     s3_bucket = os.environ.get("S3_BUCKET_NAME")
     expires_in = int(os.environ.get('PRESIGNED_URL_EXPIRATION_TIME'))
@@ -151,29 +152,24 @@ def upload_checks_and_additions(json_data):
     """Validates uploaded file and adds it to UserFileStore"""
     # Ensuring user owns the key
     user_id = g.user_id
-    file_key = json_data['file_key']
+    file_key = json_data["file_key"]
     s3_bucket = os.environ.get("S3_BUCKET_NAME")
-    if not file_key.startswith(f"attachments/files/{user_id}/"):
+    key_prefix = os.environ["S3_KEY_PREFIX"].strip("/")
+    if not file_key.startswith(f"{key_prefix}/{user_id}/"):
         return generate_error_response(True, "invalid file key.")
 
     # Fetching the metadata from S3
     try:
         head = s3.head_object(Bucket=s3_bucket, Key=file_key)
     except botocore.exceptions.ClientError as error:
-        status_code = error.response.get('ResponseMetadata', {}).get(
-            'HTTPStatusCode'
-        )
+        status_code = error.response.get("ResponseMetadata", {}).get("HTTPStatusCode")
         if status_code == 404:
             return generate_error_response(True, "file not found.", 404)
         current_app.logger.exception("Could not inspect uploaded file")
-        return generate_error_response(
-            True, "could not validate uploaded file.", 500
-        )
+        return generate_error_response(True, "could not validate uploaded file.", 500)
     except botocore.exceptions.BotoCoreError:
         current_app.logger.exception("Could not inspect uploaded file")
-        return generate_error_response(
-            True, "could not validate uploaded file.", 500
-        )
+        return generate_error_response(True, "could not validate uploaded file.", 500)
 
     # Enforcing size
     if head["ContentLength"] > int(os.environ.get('MAX_FILE_SIZE')):
