@@ -9,10 +9,10 @@ spec:
   - name: flask.application
     rules:
       - alert: FlaskApplicationUnavailable
-        expr: up{job="upload-web"} == 0
+        expr: up{job="upload-web"} == 0 or absent(up{job="upload-web"})
         for: 2m
         labels:
           severity: critical
         annotations:
           summary: "Flask application is unavailable"
-          description: "Prometheus has been unable to scrape the Flask application for more than 2 minutes."
+          description: "No healthy Flask application targets are being discovered or scraped by Prometheus for more than 2 minutes."
