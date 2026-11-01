@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: flask-alerts
+  labels:
+    release: prometheus
+spec:
+  groups:
+  - name: flask.application
+    rules:
+      - alert: FlaskApplicationUnavailable
+        expr: up{job="upload-web"} == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Flask application is unavailable"
+          description: "Prometheus has been unable to scrape the Flask application for more than 2 minutes."
