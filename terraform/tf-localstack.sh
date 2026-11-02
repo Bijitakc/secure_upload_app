@@ -2,7 +2,7 @@
 set -eu
 
 set -a
-source .env.localstack
+source .env.terraform
 set +a
 
 terraform "$@"
