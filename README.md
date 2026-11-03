@@ -1,6 +1,8 @@
 # Secure Upload App
 
-A secure file upload service built with Flask and AWS S3. Files **never touch the backend**, and access is controlled using **pre-signed URLs** with automatic expiration. Ideal for handling sensitive data in regulated industries (healthcare, fintech, legal, HR).
+A secure file upload service built with Flask and AWS S3. The application uses pre-signed URLs for direct client-to-S3 uploads and downloads, while Flask handles authorization, metadata, and file validation. 
+
+Designed with security-conscious file handling in mind, with potential applications in healthcare, fintech, legal, and HR workflows.
 
 **Medium article:** https://medium.com/@bijitakc/how-i-built-a-secure-file-upload-service-with-flask-docker-and-aws-s3-56dc7420ae76
 
@@ -16,6 +18,8 @@ A secure file upload service built with Flask and AWS S3. Files **never touch th
 - Resource requests/limits
 - Horizontal Pod Autoscaler
 - Persistent PostgreSQL storage
+- Terraform-managed AWS infrastructure
+- LocalStack for local AWS infrastructure development
 - GitHub Actions CI
 - Docker images published to GitHub Container Registry
 
@@ -57,6 +61,19 @@ The application is exposed locally through:
 `https://upload.local`
 
 The local TLS certificate and private key are intentionally excluded from Git.
+
+## Infrastructure as Code
+
+Terraform configuration is available in the `terraform/` directory.
+
+It provisions:
+
+- S3 bucket with encryption and public access restrictions
+- HTTPS-only bucket policy
+- S3 CORS configuration
+- IAM user and least-privilege S3 access policy
+
+The configuration supports both LocalStack and AWS.
 
 ## CI
 
