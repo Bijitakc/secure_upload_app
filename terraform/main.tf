@@ -1,65 +1,3 @@
-terraform {
-  required_providers {
-    aws = {
-      source = "hashicorp/aws"
-    }
-  }
-}
-
-variable "project_name" {
-  description = "Project identifier used in resource names"
-  type        = string
-}
-
-variable "environment" {
-  description = "Deployment environment"
-  type        = string
-  default     = "dev"
-}
-
-variable "aws_account_id" {
-  description = "AWS account ID used to distinguish bucket names"
-  type        = string
-}
-
-variable "aws_region" {
-  description = "AWS region for resources"
-  type        = string
-}
-
-variable "localstack_endpoint" {
-  description = "LocalStack endpoint, null uses the normal AWS endpoints"
-  type        = string
-  default     = null
-}
-
-variable "frontend_origin" {
-  description = "Allowed frontend origin for browser-based S3 uploads"
-  type        = string
-}
-
-variable "s3_key_prefix" {
-  type = string
-}
-
-locals {
-  bucket_name     = "${var.project_name}-${var.environment}-${var.aws_account_id}"
-  iam_name_prefix = "${var.project_name}-${var.environment}"
-}
-
-provider "aws" {
-  region = var.aws_region
-
-  endpoints {
-    s3        = var.localstack_endpoint
-    s3control = var.localstack_endpoint
-    sts       = var.localstack_endpoint
-    iam       = var.localstack_endpoint
-  }
-
-  s3_use_path_style = true
-}
-
 resource "aws_s3_bucket" "uploads" {
   bucket = local.bucket_name
 }
@@ -85,6 +23,10 @@ resource "aws_s3_bucket_public_access_block" "uploads" {
 
 resource "aws_s3_bucket_policy" "uploads" {
   bucket = aws_s3_bucket.uploads.id
+
+  depends_on = [
+    aws_s3_bucket_public_access_block.uploads
+  ]
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -140,7 +82,7 @@ resource "aws_iam_policy" "uploads_access" {
           "s3:GetObject",
           "s3:DeleteObject"
         ]
-        Resource = "${aws_s3_bucket.uploads.arn}/${var.s3_key_prefix}/*"
+        Resource = "${aws_s3_bucket.uploads.arn}/${trim(var.s3_key_prefix, "/")}/*"
       }
     ]
   })
@@ -157,3 +99,4 @@ resource "aws_s3_bucket_cors_configuration" "uploads" {
     max_age_seconds = 3000
   }
 }
+
