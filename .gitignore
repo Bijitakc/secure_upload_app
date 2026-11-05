@@ -7,7 +7,9 @@ instance/*
 .webassets-cache
 .env*
 !.env.sample
-!.env.localstack.sample
+!.env.terraform.sample
+!.env.test.sample
+!.env.k8s.sample
 
 ### Flask.Python Stack ###
 # Byte-compiled / optimized / DLL files
