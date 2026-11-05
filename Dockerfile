@@ -14,3 +14,11 @@ COPY . .
 
 # Give permission to run the script
 CMD ["gunicorn", "--worker-class", "eventlet", "-w", "3", "-b", "0.0.0.0:5000", "core.wsgi:app"]
+
+# Development image used by Docker Compose to run the test suite.
+FROM python:3.12 AS test
+WORKDIR /app
+COPY requirements.txt requirements-dev.txt ./
+RUN pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
+COPY . .
+CMD ["python", "-m", "pytest"]

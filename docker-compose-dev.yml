@@ -1,4 +1,16 @@
 services:
+  test:
+    profiles: ["test"]
+    env_file:
+      - .env.test
+    build:
+      context: "."
+      dockerfile: Dockerfile
+      target: test
+    volumes:
+      - .:/app
+    command: python -m pytest
+
   upload_web:
     restart: unless-stopped
     env_file:
