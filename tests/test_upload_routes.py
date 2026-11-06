@@ -1,9 +1,9 @@
 import botocore.exceptions
 import pytest
 
+import core.upload_app.routes as routes
 from core import db
 from core.models import UserFileStore
-import core.upload_app.routes as routes
 
 
 def add_file(user_id="user-1"):

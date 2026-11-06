@@ -1,7 +1,8 @@
 import os
-from flask.cli import FlaskGroup
-from core import create_app, db
 
+from flask.cli import FlaskGroup
+
+from core import create_app, db
 
 app = create_app(os.environ.get('FLASK_CONFIG'))
 cli = FlaskGroup(app)

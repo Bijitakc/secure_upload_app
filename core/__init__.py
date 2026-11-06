@@ -1,14 +1,15 @@
-import os
-import boto3
 import logging
+import os
+
+import boto3
 from flask import Flask
-from config import config
 from flask_caching import Cache
+from flask_marshmallow import Marshmallow
 from flask_migrate import Migrate
 from flask_sqlalchemy import SQLAlchemy
-from flask_marshmallow import Marshmallow
 from prometheus_flask_exporter import PrometheusMetrics
 
+from config import config
 
 # flask extensions
 cache = Cache()
@@ -43,7 +44,7 @@ def create_app(config_name, **kwargs) -> Flask:
     )
     app.config.from_object(config[config_name])
 
-    metrics = PrometheusMetrics(app)
+    PrometheusMetrics(app)
 
     # Initializing flask extensions
     cache.init_app(app)

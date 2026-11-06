@@ -1,9 +1,9 @@
 import pytest
 from flask import Flask, g
 
+import core.decorators as decorators
 from core import db
 from core.upload_app import bp
-import core.decorators as decorators
 
 
 @pytest.fixture

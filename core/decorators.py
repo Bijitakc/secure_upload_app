@@ -1,5 +1,7 @@
 from functools import wraps
-from flask import request, abort
+
+from flask import abort, request
+
 from core.utils import token_decode
 
 

@@ -1,16 +1,16 @@
-import os
-import jwt
 import json
+import os
 import uuid
-import magic
-import boto3
-import requests
-import botocore.exceptions
-from flask import g, current_app
-from sqlalchemy.exc import IntegrityError
-from requests.exceptions import RequestException
 
-from core import db, s3, cache
+import botocore.exceptions
+import jwt
+import magic
+import requests
+from flask import current_app, g
+from requests.exceptions import RequestException
+from sqlalchemy.exc import IntegrityError
+
+from core import cache, db, s3
 from core.models import UserFileStore
 
 
