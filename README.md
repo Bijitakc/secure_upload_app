@@ -1,8 +1,10 @@
 # Secure Upload App
 
-A secure file upload service built with Flask and AWS S3. Files **never touch the backend**, and access is controlled using **pre-signed URLs** with automatic expiration. Ideal for handling sensitive data in regulated industries (healthcare, fintech, legal, HR).
+A secure file upload service built with Flask and AWS S3. The application uses pre-signed URLs for direct client-to-S3 uploads and downloads, while Flask handles authorization, metadata, and file validation. 
 
-**Medium article:** https://medium.com/@bijitakc/how-i-built-a-secure-file-upload-service-with-flask-docker-and-aws-s3-56dc7420ae76
+Designed with security-conscious file handling in mind, with potential applications in healthcare, fintech, legal, and HR workflows.
+
+**Implementation article:** https://medium.com/@bijitakc/how-i-built-a-secure-file-upload-service-with-flask-docker-and-aws-s3-56dc7420ae76
 
 ## Features
 
@@ -16,6 +18,8 @@ A secure file upload service built with Flask and AWS S3. Files **never touch th
 - Resource requests/limits
 - Horizontal Pod Autoscaler
 - Persistent PostgreSQL storage
+- Terraform-managed AWS infrastructure
+- LocalStack for local AWS infrastructure development
 - GitHub Actions CI
 - Docker images published to GitHub Container Registry
 
@@ -26,8 +30,8 @@ Copy `.env.sample` to `.env.dev` and add the required variables.
 
 ### Run the project using Docker by following these steps
 
-- `docker-compose --env-file .env.dev -f docker-compose-dev.yml build`
-- `docker-compose --env-file .env.dev -f docker-compose-dev.yml up -d`
+- `docker compose --env-file .env.dev -f docker-compose-dev.yml build`
+- `docker compose --env-file .env.dev -f docker-compose-dev.yml up -d`
 
 ### Initial steps to set up DB
 
@@ -35,6 +39,26 @@ Copy `.env.sample` to `.env.dev` and add the required variables.
 - `python manage.py create_db`
 - `flask db stamp head`
 - `flask db upgrade`
+
+## Testing
+
+The project uses pytest for automated route tests. Tests run inside a dedicated Docker Compose service, keeping the test environment separate from the development application.
+
+### Run tests
+`docker compose -f docker-compose-dev.yml run --rm test`
+
+
+### Test environment
+The test service:
+- Uses a dedicated Docker build stage with test dependencies.
+- Loads test-specific configuration from .env.test.
+- Uses an isolated SQLite database for tests.
+- Uses pytest fixtures for application setup, test client creation, and database cleanup.
+
+Create .env.test in the project root with the required test configuration. See .env.test.sample for the expected variables.
+
+Tests can be run independently without starting the application stack.
+
 
 ## Kubernetes
 
@@ -57,6 +81,21 @@ The application is exposed locally through:
 `https://upload.local`
 
 The local TLS certificate and private key are intentionally excluded from Git.
+
+**Kubernetes Article:** https://medium.com/@bijitakc/i-added-kubernetes-to-my-flask-app-heres-what-i-learned-81b1ef4d2341
+
+## Infrastructure as Code
+
+Terraform configuration is available in the `terraform/` directory.
+
+It provisions:
+
+- S3 bucket with encryption and public access restrictions
+- HTTPS-only bucket policy
+- S3 CORS configuration
+- IAM user and least-privilege S3 access policy
+
+The configuration supports both LocalStack and AWS.
 
 ## CI
 
