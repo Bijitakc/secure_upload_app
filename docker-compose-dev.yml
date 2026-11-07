@@ -9,7 +9,6 @@ services:
       target: test
     volumes:
       - .:/app
-    command: python -m pytest
 
   upload_web:
     restart: unless-stopped
