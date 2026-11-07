@@ -1,4 +1,4 @@
-FROM python:3.12
+FROM python:3.12 AS app
 
 RUN apt-get update \
     && apt-get upgrade -y \

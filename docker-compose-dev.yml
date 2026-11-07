@@ -18,6 +18,7 @@ services:
     build:
       context: "."
       dockerfile: Dockerfile
+      target: app
     expose:
       - "5000"
     command: gunicorn --worker-class eventlet -w 3 -b 0.0.0.0:5000 core.wsgi:app --reload

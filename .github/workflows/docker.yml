@@ -47,6 +47,7 @@ jobs:
       - name: Build docker image
         run: |
           docker build \
+            --target app\
             -t ghcr.io/bijitakc/secure-upload-app:latest \
             -t ghcr.io/bijitakc/secure-upload-app:${{ github.sha }} .
       
