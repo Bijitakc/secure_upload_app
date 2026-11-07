@@ -99,7 +99,17 @@ The configuration supports both LocalStack and AWS.
 
 ## CI
 
-GitHub Actions builds the Docker image and publishes it to GitHub Container Registry on pushes to `master`.
+GitHub Actions runs the CI pipeline on pull requests targeting `master` and pushes to `master`.
+
+The pipeline performs:
+
+- Python code linting with Ruff.
+- Dependency vulnerability auditing with `pip-audit`.
+- Automated testing with pytest.
+- Docker image building.
+- Container vulnerability scanning with Trivy.
+
+On pushes to `master`, validated Docker images are published to GitHub Container Registry (GHCR).
 
 Images are tagged with:
 
