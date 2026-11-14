@@ -61,3 +61,15 @@ variable "s3_key_prefix" {
     error_message = "S3 key prefix must not be empty or contain wildcard characters."
   }
 }
+
+variable "instance_type" {
+  description = "EC2 instance type for the uploads application"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "localstack_ami_id" {
+  description = "AMI ID used when testing with localstack"
+  type        = string
+  default     = "ami-785db401"
+}

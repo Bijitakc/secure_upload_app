@@ -10,6 +10,7 @@ provider "aws" {
     s3  = var.localstack_endpoint
     sts = var.localstack_endpoint
     iam = var.localstack_endpoint
+    ec2 = var.localstack_endpoint
   }
 
   default_tags {

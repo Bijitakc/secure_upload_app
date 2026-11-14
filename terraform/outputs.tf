@@ -8,7 +8,12 @@ output "uploads_bucket_arn" {
   value       = aws_s3_bucket.uploads.arn
 }
 
-output "uploads_iam_user_name" {
-  description = "IAM user used by the application"
-  value       = aws_iam_user.uploads_app.name
+output "instance_id" {
+  description = "EC2 instance ID"
+  value       = aws_instance.uploads_app.id
+}
+
+output "instance_public_ip" {
+  description = "EC2 public IP address"
+  value       = aws_instance.uploads_app.public_ip
 }
