@@ -82,7 +82,7 @@ The application is exposed locally through:
 
 The local TLS certificate and private key are intentionally excluded from Git.
 
-**Kubernetes Article:** https://medium.com/@bijitakc/i-added-kubernetes-to-my-flask-app-heres-what-i-learned-81b1ef4d2341
+**Kubernetes Implementation Article:** https://medium.com/@bijitakc/i-added-kubernetes-to-my-flask-app-heres-what-i-learned-81b1ef4d2341
 
 ## Infrastructure as Code
 
