@@ -1,4 +1,4 @@
-FROM python:3.12 AS app
+FROM python:3.12-slim AS app
 
 RUN apt-get update \
     && apt-get upgrade -y \
@@ -20,7 +20,7 @@ COPY . .
 CMD ["gunicorn", "--worker-class", "eventlet", "-w", "3", "-b", "0.0.0.0:5000", "core.wsgi:app"]
 
 # Development image used by Docker Compose to run the test suite.
-FROM python:3.12 AS test
+FROM python:3.12-slim AS test
 RUN apt-get update \
     && apt-get upgrade -y \
     && rm -rf /var/lib/apt/lists/*
