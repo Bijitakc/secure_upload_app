@@ -1,5 +1,28 @@
+# Git
 .git/
-__pycache__/
-.env*
 .gitignore
+.github/
+
+# Python
+__pycache__/
+**/__pycache__/
 *.pyc
+**/*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# Environment files
+.env*
+!.env.*.sample
+
+# Terraform
+terraform/
+**/.terraform/
+**/*.tfstate
+**/*.tfstate.*
+
+# Kubernetes local configuration
+k8s/
+*.key
+*.pem
