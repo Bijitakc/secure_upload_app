@@ -127,6 +127,10 @@ resource "aws_security_group" "uploads_app" {
   name        = "${local.iam_name_prefix}-sg"
   description = "Security group for the uploads application"
   vpc_id      = data.aws_vpc.default.id
+
+  tags = {
+    Name = "${local.iam_name_prefix}-sg"
+  }
 }
 
 resource "aws_vpc_security_group_ingress_rule" "http" {
@@ -143,6 +147,26 @@ resource "aws_vpc_security_group_ingress_rule" "https" {
   security_group_id = aws_security_group.uploads_app.id
 
   description = "HTTPS access"
+  ip_protocol = "tcp"
+  from_port   = 443
+  to_port     = 443
+  cidr_ipv4   = "0.0.0.0/0"
+}
+
+resource "aws_vpc_security_group_egress_rule" "http" {
+  security_group_id = aws_security_group.uploads_app.id
+
+  description = "Allow outbound HTTP"
+  ip_protocol = "tcp"
+  from_port   = 80
+  to_port     = 80
+  cidr_ipv4   = "0.0.0.0/0"
+}
+
+resource "aws_vpc_security_group_egress_rule" "https" {
+  security_group_id = aws_security_group.uploads_app.id
+
+  description = "Allow outbound HTTPS"
   ip_protocol = "tcp"
   from_port   = 443
   to_port     = 443
@@ -176,9 +200,10 @@ data "aws_ami" "ubuntu" {
 }
 
 resource "aws_instance" "uploads_app" {
-  ami                  = var.localstack_endpoint != null ? var.localstack_ami_id : data.aws_ami.ubuntu[0].id
-  instance_type        = var.instance_type
-  iam_instance_profile = aws_iam_instance_profile.uploads_app.name
+  ami                         = var.localstack_endpoint != null ? var.localstack_ami_id : data.aws_ami.ubuntu[0].id
+  instance_type               = var.instance_type
+  iam_instance_profile        = aws_iam_instance_profile.uploads_app.name
+  associate_public_ip_address = var.localstack_endpoint != null ? true : false
 
   vpc_security_group_ids = [
     aws_security_group.uploads_app.id
@@ -200,4 +225,17 @@ resource "aws_instance" "uploads_app" {
     Name        = "${local.iam_name_prefix}-ec2"
     Environment = "dev"
   }
+}
+
+resource "aws_eip" "uploads_app" {
+  domain = "vpc"
+
+  tags = {
+    Name = "${local.iam_name_prefix}-eip"
+  }
+}
+
+resource "aws_eip_association" "uploads_app" {
+  instance_id   = aws_instance.uploads_app.id
+  allocation_id = aws_eip.uploads_app.id
 }
