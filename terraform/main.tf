@@ -204,6 +204,8 @@ resource "aws_instance" "uploads_app" {
   instance_type               = var.instance_type
   iam_instance_profile        = aws_iam_instance_profile.uploads_app.name
   associate_public_ip_address = var.localstack_endpoint != null ? true : false
+  user_data                   = file("${path.module}/user_data.sh")
+  user_data_replace_on_change = true
 
   vpc_security_group_ids = [
     aws_security_group.uploads_app.id
