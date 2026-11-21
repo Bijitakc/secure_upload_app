@@ -222,7 +222,7 @@ resource "aws_instance" "uploads_app" {
 
   tags = {
     Name        = "${local.iam_name_prefix}-ec2"
-    Environment = "dev"
+    Environment = var.environment
   }
 }
 
