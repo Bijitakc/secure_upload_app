@@ -22,4 +22,3 @@ output "instance_elastic_ip" {
   description = "Elastic IP address of the uploads application"
   value       = aws_eip.uploads_app.public_ip
 }
-

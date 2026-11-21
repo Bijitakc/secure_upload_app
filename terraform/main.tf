@@ -119,14 +119,10 @@ resource "aws_iam_instance_profile" "uploads_app" {
   role = aws_iam_role.uploads_app.name
 }
 
-data "aws_vpc" "default" {
-  default = true
-}
-
 resource "aws_security_group" "uploads_app" {
   name        = "${local.iam_name_prefix}-sg"
   description = "Security group for the uploads application"
-  vpc_id      = data.aws_vpc.default.id
+  vpc_id      = aws_vpc.main.id
 
   tags = {
     Name = "${local.iam_name_prefix}-sg"
@@ -206,6 +202,7 @@ resource "aws_instance" "uploads_app" {
   associate_public_ip_address = var.localstack_endpoint != null ? true : false
   user_data                   = file("${path.module}/user_data.sh")
   user_data_replace_on_change = true
+  subnet_id                   = aws_subnet.public.id
 
   vpc_security_group_ids = [
     aws_security_group.uploads_app.id
